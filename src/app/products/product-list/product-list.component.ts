@@ -1,12 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Subscription } from 'rxjs';
 
 import { Product } from '../product';
 import { ProductService } from '../product.service';
 import * as fromState from '../state/product.reducer';
-import * as ProductActions from '../state/product.action';
-
+import * as productActions from '../state/product.action';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'pm-product-list',
@@ -23,42 +22,38 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   // Used to highlight the selected product in the list
   selectedProduct: Product | null;
-  sub: Subscription;
+  errorMessage$: Observable<string>;
 
   constructor(
     private store: Store<fromState.State>,
     private productService: ProductService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.sub = this.productService.selectedProductChanges$.subscribe(
-      selectedProduct => (this.selectedProduct = selectedProduct)
-    );
-
-    this.productService
-      .getProducts()
-      .subscribe(
-        (products: Product[]) => (this.products = products),
-        (err: any) => (this.errorMessage = err.error)
-      );
-      this.store
+    this.store
+      .pipe(select(fromState.getCurrentProduct))
+      .subscribe(currentProduct => (this.selectedProduct = currentProduct));
+    this.store.dispatch(new productActions.LoadProduct());
+    this.store
+      .pipe(select(fromState.getProducts))
+      .subscribe((products: Product[]) => (this.products = products));
+    this.store
       .pipe(select(fromState.getShowProductCode))
-      .subscribe(showProductCode => this.displayCode = showProductCode);
+      .subscribe(showProductCode => (this.displayCode = showProductCode));
+    this.errorMessage$ = this.store.pipe(select(fromState.getErrors));
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
+  ngOnDestroy(): void {}
 
   checkChanged(value: boolean): void {
-    this.store.dispatch(new ProductActions.ToggleProductCode(true));
+    this.store.dispatch(new productActions.ToggleProductCode(value));
   }
 
   newProduct(): void {
-    this.productService.changeSelectedProduct(this.productService.newProduct());
+    this.store.dispatch(new productActions.InitializeCurrentProduct());
   }
 
   productSelected(product: Product): void {
-    this.productService.changeSelectedProduct(product);
+    this.store.dispatch(new productActions.SetCurrentProduct(product));
   }
 }
