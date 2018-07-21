@@ -1,18 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Subscription } from "rxjs";
+import { Subscription } from 'rxjs';
 
-import { Product } from "../product";
-import { ProductService } from "../product.service";
-import { Store, select } from "@ngrx/store";
+import { Product } from '../product';
+import { ProductService } from '../product.service';
+import { Store, select } from '@ngrx/store';
 
 @Component({
-  selector: "pm-product-list",
-  templateUrl: "./product-list.component.html",
-  styleUrls: ["./product-list.component.css"]
+  selector: 'pm-product-list',
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent implements OnInit, OnDestroy {
-  pageTitle = "Products";
+  pageTitle = 'Products';
   errorMessage: string;
 
   displayCode: boolean;
@@ -54,7 +54,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   checkChanged(value: boolean): void {
     this.store.dispatch({
-      type: "TOOGLE_PRODUCT_CODE",
+      type: 'TOOGLE_PRODUCT_CODE',
       payload: value
     });
   }
