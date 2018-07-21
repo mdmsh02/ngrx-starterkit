@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { Product } from '../product';
 import { ProductService } from '../product.service';
 import * as fromState from '../state/product.reducer';
+import * as ProductActions from '../state/product.action';
 
 
 @Component({
@@ -50,10 +51,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   checkChanged(value: boolean): void {
-    this.store.dispatch({
-      type: 'TOOGLE_PRODUCT_CODE',
-      payload: value
-    });
+    this.store.dispatch(new ProductActions.ToggleProductCode(true));
   }
 
   newProduct(): void {
