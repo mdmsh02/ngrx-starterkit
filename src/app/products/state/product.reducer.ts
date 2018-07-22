@@ -8,13 +8,13 @@ export interface State extends fromRoot.State {
 }
 export interface ProductState {
     showProductCode: boolean;
-    currentProduct: Product;
+    currentProductId: number;
     products: Product[];
     error: string;
 }
 const initialState: ProductState = {
     showProductCode: true,
-    currentProduct: null,
+    currentProductId: 0 || null,
     products: [],
     error: ''
 };
@@ -23,10 +23,27 @@ const getProductFeatureSelector = createFeatureSelector<ProductState>('products'
 
 export const getShowProductCode = createSelector(
     getProductFeatureSelector, state => state.showProductCode);
+export const getCurrentProductId = createSelector(
+    getProductFeatureSelector,
+    state => state.currentProductId
+);
 
 export const getCurrentProduct = createSelector(
     getProductFeatureSelector,
-    state => state.currentProduct
+    getCurrentProductId,
+    (state, currentproductId) => {
+        if (currentproductId === 0) {
+            return {
+                id: 0,
+                productName: '',
+                productCode: 'NEW',
+                description: '',
+                starRating: 0
+            };
+        } else {
+            return currentproductId ? state.products.find(p => p.id === currentproductId) : null;
+        }
+    }
 );
 
 export const getProducts = createSelector(
@@ -47,42 +64,36 @@ export function reducer(state = initialState, action: ProductAction): ProductSta
                 showProductCode: action.payload
 
             };
-            case ProductActionTypes.SetCurrentProduct:
+        case ProductActionTypes.SetCurrentProduct:
             return {
                 ...state,
-                currentProduct: {...action.payload}
+                currentProductId: action.payload.id
 
             };
-            case ProductActionTypes.ClearCurrentProduct:
+        case ProductActionTypes.ClearCurrentProduct:
             return {
                 ...state,
-                currentProduct: null
+                currentProductId: null
 
             };
-            case ProductActionTypes.LoadProductSuccess:
+        case ProductActionTypes.LoadProductSuccess:
             return {
                 ...state,
                 products: action.payload,
                 error: ''
 
             };
-            case ProductActionTypes.LoadProductFail:
+        case ProductActionTypes.LoadProductFail:
             return {
                 ...state,
                 products: [],
                 error: action.payload
 
             };
-            case ProductActionTypes.InitializeCurrentProduct:
+        case ProductActionTypes.InitializeCurrentProduct:
             return {
                 ...state,
-                currentProduct: {
-                    id: 0,
-                    productName: '',
-                    productCode: 'NEW',
-                    description: '',
-                    starRating: 0
-                }
+                currentProductId: 0
 
             };
         default:
